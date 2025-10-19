@@ -6,6 +6,14 @@
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,js,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky install",
+    "pre-commit": "lint-staged",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -17,19 +25,42 @@
     "@types/express": "^5.0.3",
     "@types/mailparser": "^3.4.6",
     "@types/node": "^24.8.1",
-    "@types/node-imap": "^0.9.3",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
     "nodemon": "^3.1.10",
+    "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.19.1",
     "@huggingface/inference": "^4.11.3",
+    "@types/nodemailer": "^7.0.2",
     "axios": "^1.12.2",
+    "chromadb": "^3.0.17",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "imap": "^0.8.19",
+    "imapflow": "^1.0.200",
+    "langchain": "^1.0.1",
     "mailparser": "^3.7.5",
-    "node-imap": "^0.9.6"
+    "nodemailer": "^7.0.9",
+    "openai": "^6.5.0",
+    "uuid": "^13.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
