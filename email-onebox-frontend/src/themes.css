@@ -119,6 +119,16 @@
   /* Enhanced shadows */
   --shadow-colored: 0 10px 25px -5px rgba(37, 99, 235, 0.15), 0 4px 6px -2px rgba(37, 99, 235, 0.05);
   --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.3);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
+  --border-secondary: var(--border-secondary);
 }
 
 /* Dark Theme - Sophisticated and Modern */
@@ -159,6 +169,15 @@
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
   --shadow-colored: 0 10px 25px -5px rgba(99, 102, 241, 0.4), 0 4px 6px -2px rgba(99, 102, 241, 0.3);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.5);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
 }
 
 /* Ocean Theme - Beautiful Teal & Aqua */
@@ -194,6 +213,15 @@
   /* Ocean shadows */
   --shadow-colored: 0 10px 25px -5px rgba(8, 145, 178, 0.25), 0 4px 6px -2px rgba(8, 145, 178, 0.1);
   --shadow-glow: 0 0 20px rgba(8, 145, 178, 0.4);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
 }
 
 /* Sunset Theme - Warm Coral & Peach */
@@ -229,6 +257,15 @@
   /* Warm shadows */
   --shadow-colored: 0 10px 25px -5px rgba(255, 107, 107, 0.3), 0 4px 6px -2px rgba(255, 107, 107, 0.1);
   --shadow-glow: 0 0 20px rgba(255, 107, 107, 0.4);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
 }
 
 /* Forest Theme - Deep Nature Greens */
@@ -269,6 +306,15 @@
   --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
   --shadow-colored: 0 10px 25px -5px rgba(22, 163, 74, 0.4), 0 4px 6px -2px rgba(22, 163, 74, 0.3);
   --shadow-glow: 0 0 20px rgba(22, 163, 74, 0.6);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
 }
 
 /* Minimal Theme - Elegant Monochrome */
@@ -304,6 +350,15 @@
   /* Subtle shadows */
   --shadow-colored: 0 10px 25px -5px rgba(31, 41, 55, 0.15), 0 4px 6px -2px rgba(31, 41, 55, 0.05);
   --shadow-glow: 0 0 20px rgba(31, 41, 55, 0.2);
+  
+  /* Legacy compatibility mappings */
+  --foreground: var(--text-primary);
+  --foreground-secondary: var(--text-secondary);
+  --foreground-tertiary: var(--text-tertiary);
+  --foreground-muted: var(--text-muted);
+  --background-secondary: var(--bg-secondary);
+  --background-tertiary: var(--bg-tertiary);
+  --border: var(--border-color);
 }
 
 /* Global Base Styles */
@@ -329,7 +384,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   transition: background-color var(--transition-normal), color var(--transition-normal);
   min-height: 100%;
 }
@@ -341,7 +396,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-secondary);
+  background: var(--bg-secondary);
   border-radius: var(--radius);
 }
 
@@ -352,7 +407,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground-muted);
+  background: var(--text-muted);
 }
 
 /* Enhanced Focus Styles */
@@ -410,9 +465,9 @@ button {
 input, textarea, select {
   font-family: inherit;
   font-size: inherit;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   background: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   transition: all var(--transition-fast);
 }
 

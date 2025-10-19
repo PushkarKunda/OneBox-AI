@@ -42,7 +42,7 @@
 .menu-toggle {
   background: var(--background-secondary);
   border: 1px solid var(--border);
-  color: var(--foreground);
+  color: var(--text-primary);
   width: 44px;
   height: 44px;
   border-radius: var(--radius-lg);
@@ -90,13 +90,13 @@
   margin: 0;
   font-size: var(--text-xl);
   font-weight: var(--font-weight-bold);
-  color: var(--foreground);
+  color: var(--text-primary);
   letter-spacing: -0.02em;
 }
 
 .logo-subtitle {
   font-size: var(--text-xs);
-  color: var(--foreground-tertiary);
+  color: var(--text-tertiary);
   font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -120,7 +120,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--background-secondary);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-size: var(--text-sm);
   transition: all var(--transition-normal);
 }
@@ -133,7 +133,7 @@
 }
 
 .global-search-input::placeholder {
-  color: var(--foreground-muted);
+  color: var(--text-muted);
   padding-left: 0;
   text-indent: 0;
 }
@@ -155,7 +155,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 16px;
-  color: var(--foreground-muted);
+  color: var(--text-muted);
   z-index: 2;
   pointer-events: none;
   width: 16px;
