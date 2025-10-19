@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './themes.css';
 import './App.css';
-import './modern.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import AdvancedSearchBar from './components/AdvancedSearchBar';
@@ -11,6 +11,7 @@ import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { Email, emailService } from './services/api';
+import FloatingActionButton from './components/FloatingActionButton';
 
 interface SearchFilters {
   query: string;
@@ -190,6 +191,12 @@ function App() {
             </div>
           </div>
         </div>
+        
+        <FloatingActionButton 
+          onCompose={() => toast.info('Compose feature coming soon!')}
+          onRefresh={handleRefresh}
+          onSearch={() => toast.info('Advanced search is in the header!')}
+        />
         
         <ToastContainer
           position="bottom-right"

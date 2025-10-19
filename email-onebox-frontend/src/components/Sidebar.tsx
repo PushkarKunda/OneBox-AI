@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -14,132 +15,175 @@ const Sidebar: React.FC<SidebarProps> = ({
   selectedFolder, 
   onFolderSelect 
 }) => {
+  // Using modern theme-aware sidebar design
+
   const folders = [
-    { id: 'inbox', name: 'Inbox', icon: '📥', count: 12, color: '#4f46e5' },
-    { id: 'starred', name: 'Starred', icon: '⭐', count: 5, color: '#f59e0b' },
-    { id: 'sent', name: 'Sent', icon: '📤', count: 0, color: '#10b981' },
-    { id: 'drafts', name: 'Drafts', icon: '✏️', count: 3, color: '#6b7280' },
-    { id: 'archive', name: 'Archive', icon: '🗄', count: 0, color: '#8b5cf6' },
-    { id: 'trash', name: 'Trash', icon: '🗑️', count: 0, color: '#ef4444' },
+    { id: 'inbox', name: 'Inbox', icon: '📧', count: 12, primary: true },
+    { id: 'starred', name: 'Starred', icon: '⭐', count: 5 },
+    { id: 'sent', name: 'Sent', icon: '📤', count: 0 },
+    { id: 'drafts', name: 'Drafts', icon: '📝', count: 3 },
+    { id: 'archive', name: 'Archive', icon: '🗄️', count: 0 },
+    { id: 'trash', name: 'Trash', icon: '🗑️', count: 0 },
   ];
 
-  const labels = [
-    { id: 'work', name: 'Work', color: '#3b82f6' },
-    { id: 'personal', name: 'Personal', color: '#10b981' },
-    { id: 'important', name: 'Important', color: '#f59e0b' },
-    { id: 'travel', name: 'Travel', color: '#8b5cf6' },
+  const quickActions = [
+    { id: 'unread', name: 'Unread Only', icon: '🔵', filter: true },
+    { id: 'today', name: 'Today', icon: '📅', filter: true },
+    { id: 'attachments', name: 'With Attachments', icon: '📎', filter: true },
+    { id: 'important', name: 'Important', icon: '❗', filter: true },
+  ];
+
+  const accounts = [
+    { id: 'work', name: 'work@company.com', icon: '🏢', active: true },
+    { id: 'personal', name: 'personal@email.com', icon: '👤', active: false },
   ];
 
   return (
-    <>
+    <AnimatePresence>
       {isOpen && (
-        <motion.div 
-          className="sidebar-overlay"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-        />
-      )}
-      
-      <motion.aside 
-        className={`sidebar ${isOpen ? 'open' : ''}`}
-        initial={{ x: -280 }}
-        animate={{ x: isOpen ? 0 : -280 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <div className="sidebar-content">
-          <motion.button 
-            className="compose-btn"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+        <>
+          <motion.div 
+            className="sidebar-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            transition={{ duration: 0.2 }}
+          />
+          
+          <motion.aside 
+            className="modern-sidebar"
+            initial={{ x: -320, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: -320, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            ➕ Compose
-          </motion.button>
+            <div className="sidebar-header">
+              <div className="sidebar-brand">
+                <div className="brand-icon">📧</div>
+                <div className="brand-info">
+                  <h2 className="brand-title">MailBox</h2>
+                  <span className="brand-subtitle">Professional Email</span>
+                </div>
+              </div>
+              <motion.button 
+                className="sidebar-close"
+                onClick={onClose}
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                ✕
+              </motion.button>
+            </div>
 
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Folders</h3>
-            <nav className="sidebar-nav">
-              {folders.map((folder) => {
-                return (
-                  <motion.button
-                    key={folder.id}
-                    className={`sidebar-item ${selectedFolder === folder.id ? 'active' : ''}`}
-                    onClick={() => onFolderSelect(folder.id)}
-                    whileHover={{ x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className="sidebar-item-content">
-                      <span style={{ color: folder.color, fontSize: '18px' }}>
-                        {folder.icon}
-                      </span>
-                      <span className="sidebar-item-text">{folder.name}</span>
-                    </div>
-                    {folder.count > 0 && (
-                      <motion.span 
-                        className="sidebar-count"
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        style={{ backgroundColor: folder.color }}
-                      >
-                        {folder.count}
-                      </motion.span>
-                    )}
-                  </motion.button>
-                );
-              })}
-            </nav>
-          </div>
+            <div className="sidebar-content">
+              <motion.button 
+                className="compose-button"
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <span className="compose-icon">✏️</span>
+                <span className="compose-text">Compose Email</span>
+              </motion.button>
 
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Labels</h3>
-            <nav className="sidebar-nav">
-              {labels.map((label) => (
-                <motion.button
-                  key={label.id}
-                  className="sidebar-item label-item"
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="sidebar-item-content">
-                    <span style={{ color: label.color, fontSize: '16px' }}>
-                      🏷️
-                    </span>
-                    <span className="sidebar-item-text">{label.name}</span>
+              <div className="sidebar-section">
+                <h3 className="section-title">Email Accounts</h3>
+                <div className="section-content">
+                  {accounts.map((account, index) => (
+                    <motion.div
+                      key={account.id}
+                      className={`account-item ${account.active ? 'active' : ''}`}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <div className="account-avatar">{account.icon}</div>
+                      <div className="account-info">
+                        <span className="account-email">{account.name}</span>
+                        {account.active && <span className="account-status">Active</span>}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sidebar-section">
+                <h3 className="section-title">Folders</h3>
+                <div className="section-content">
+                  {folders.map((folder, index) => (
+                    <motion.button
+                      key={folder.id}
+                      className={`folder-item ${selectedFolder === folder.id ? 'selected' : ''} ${folder.primary ? 'primary' : ''}`}
+                      onClick={() => onFolderSelect(folder.id)}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ x: 4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="folder-content">
+                        <span className="folder-icon">{folder.icon}</span>
+                        <span className="folder-name">{folder.name}</span>
+                      </div>
+                      {folder.count > 0 && (
+                        <motion.span 
+                          className="folder-count"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500 }}
+                        >
+                          {folder.count}
+                        </motion.span>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sidebar-section">
+                <h3 className="section-title">Quick Filters</h3>
+                <div className="section-content">
+                  {quickActions.map((action, index) => (
+                    <motion.button
+                      key={action.id}
+                      className="filter-item"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ x: 4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="filter-content">
+                        <span className="filter-icon">{action.icon}</span>
+                        <span className="filter-name">{action.name}</span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sidebar-footer">
+                <div className="storage-info">
+                  <div className="storage-header">
+                    <span className="storage-title">📊 Storage</span>
+                    <span className="storage-usage">2.1 GB / 15 GB</span>
                   </div>
-                </motion.button>
-              ))}
-            </nav>
-          </div>
-
-          <div className="sidebar-section">
-            <h3 className="sidebar-title">Quick Filters</h3>
-            <nav className="sidebar-nav">
-              <motion.button
-                className="sidebar-item filter-item"
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="sidebar-item-content">
-                  <span style={{ fontSize: '16px' }}>💭</span>
-                  <span className="sidebar-item-text">Unread</span>
+                  <div className="storage-bar">
+                    <motion.div 
+                      className="storage-fill"
+                      initial={{ width: 0 }}
+                      animate={{ width: "14%" }}
+                      transition={{ delay: 0.5, duration: 1 }}
+                    />
+                  </div>
                 </div>
-              </motion.button>
-              <motion.button
-                className="sidebar-item filter-item"
-                whileHover={{ x: 4 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <div className="sidebar-item-content">
-                  <span style={{ fontSize: '16px' }}>📁</span>
-                  <span className="sidebar-item-text">Today</span>
-                </div>
-              </motion.button>
-            </nav>
-          </div>
-        </div>
-      </motion.aside>
-    </>
+              </div>
+            </div>
+          </motion.aside>
+        </>
+      )}
+    </AnimatePresence>
   );
 };
 

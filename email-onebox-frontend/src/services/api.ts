@@ -30,6 +30,38 @@ export interface EmailSearchResponse {
   };
 }
 
+export interface EmailContext {
+  subject: string;
+  body: string;
+  from: string;
+  to: string[];
+  date: string;
+}
+
+export interface SuggestedReply {
+  id: string;
+  content: string;
+  confidence: number;
+  context: {
+    relevantKnowledge: any[];
+    matchedTemplate: any;
+    reasoning: string;
+  };
+  metadata: {
+    category: string;
+    tone: 'professional' | 'friendly' | 'formal';
+    action_required: boolean;
+    estimated_response_time: string;
+  };
+}
+
+export interface ReplySuggestionsResponse {
+  success: boolean;
+  email_id: string;
+  suggestions: SuggestedReply[];
+  generated_at: string;
+}
+
 export const emailService = {
   searchEmails: async (query: string = '', account: string = ''): Promise<Email[]> => {
     try {
@@ -86,6 +118,39 @@ export const emailService = {
     } catch (error) {
       console.error('Connection test failed:', error);
       return false;
+    }
+  },
+
+  generateReplySuggestions: async (email: EmailContext): Promise<SuggestedReply[]> => {
+    try {
+      console.log('Requesting reply suggestions for:', email.subject);
+      
+      const response = await api.post<ReplySuggestionsResponse>('/suggest-replies', email);
+      
+      if (response.data.success) {
+        console.log(`Generated ${response.data.suggestions.length} reply suggestions`);
+        return response.data.suggestions;
+      } else {
+        throw new Error('Failed to generate reply suggestions');
+      }
+    } catch (error: any) {
+      console.error('Error generating reply suggestions:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw new Error(`Failed to generate reply suggestions: ${error.response?.data?.error || error.message}`);
+    }
+  },
+
+  getRagStats: async (): Promise<any> => {
+    try {
+      const response = await api.get('/rag-stats');
+      return response.data;
+    } catch (error: any) {
+      console.error('Error fetching RAG stats:', error);
+      throw new Error(`Failed to fetch RAG stats: ${error.message}`);
     }
   }
 };

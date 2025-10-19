@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTheme } from '../contexts/ThemeContext';
+import ThemeSelector from './ThemeSelector';
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({
   refreshing, 
   unreadCount 
 }) => {
-  const { isDarkMode, toggleTheme } = useTheme();
+  // Theme context is used by ThemeSelector component
 
   return (
     <motion.header 
@@ -95,14 +95,7 @@ const Header: React.FC<HeaderProps> = ({
               <span className="notification-dot"></span>
             </motion.button>
 
-            <motion.button 
-              className="theme-toggle"
-              onClick={toggleTheme}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {isDarkMode ? '☀️' : '🌙'}
-            </motion.button>
+            <ThemeSelector />
 
             <motion.button 
               className="settings-btn"
