@@ -249,6 +249,32 @@ function App() {
     email._source?.subject?.toLowerCase().includes('new')
   ).length;
 
+  // Get available accounts from email data
+  const availableAccounts = React.useMemo(() => {
+    const accounts = new Set<string>();
+    allEmails.forEach(email => {
+      if (email._source?.account) {
+        accounts.add(email._source.account);
+      }
+      // Also check the 'to' field for received emails
+      if (Array.isArray(email._source?.to)) {
+        email._source.to.forEach(addr => accounts.add(addr));
+      } else if (email._source?.to) {
+        accounts.add(email._source.to);
+      }
+    });
+    const filtered = Array.from(accounts).filter(account => 
+      account && account.includes('@') && !account.includes('no-reply')
+    );
+    console.log('Available accounts detected:', filtered);
+    return filtered;
+  }, [allEmails]);
+
+  // Use the first available account or selected account
+  const currentFromAccount = selectedAccount || availableAccounts[0] || 'your.email@company.com';
+  
+  console.log('Current from account:', currentFromAccount, 'Selected account:', selectedAccount);
+
   return (
     <ThemeProvider>
       <div className="App">
@@ -347,7 +373,8 @@ function App() {
         <ComposeModal 
           isOpen={showComposeModal}
           onClose={() => setShowComposeModal(false)}
-          defaultAccount={selectedAccount}
+          defaultAccount={currentFromAccount}
+          availableAccounts={availableAccounts}
         />
         
         <ToastContainer

@@ -7,9 +7,10 @@ interface ComposeModalProps {
   isOpen: boolean;
   onClose: () => void;
   defaultAccount?: string;
+  availableAccounts?: string[];
 }
 
-const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAccount }) => {
+const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAccount, availableAccounts = [] }) => {
   const [emailData, setEmailData] = useState({
     to: '',
     cc: '',
@@ -21,7 +22,17 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [sending, setSending] = useState(false);
+  const [fromAccount, setFromAccount] = useState(defaultAccount || availableAccounts[0] || 'your.email@company.com');
   
+  // Update fromAccount when defaultAccount changes
+  React.useEffect(() => {
+    if (defaultAccount && defaultAccount !== 'your.email@company.com') {
+      setFromAccount(defaultAccount);
+    } else if (availableAccounts.length > 0) {
+      setFromAccount(availableAccounts[0]);
+    }
+  }, [defaultAccount, availableAccounts]);
+
   // Prevent body scroll when modal is open
   React.useEffect(() => {
     if (isOpen) {
@@ -48,7 +59,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
     
     try {
       const emailPayload = {
-        from: defaultAccount || 'your.email@company.com',
+        from: fromAccount,
         to: emailData.to,
         cc: emailData.cc || undefined,
         bcc: emailData.bcc || undefined,
@@ -185,19 +196,41 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
                 <label style={{ color: 'var(--text-primary)', fontSize: '14px', fontWeight: '500' }}>
                   From
                 </label>
-                <input
-                  type="email"
-                  value={defaultAccount || 'your.email@company.com'}
-                  disabled
-                  style={{
-                    padding: '12px 16px',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    backgroundColor: 'var(--bg-tertiary)',
-                    color: 'var(--text-secondary)',
-                    fontSize: '14px'
-                  }}
-                />
+                {availableAccounts.length > 1 ? (
+                  <select
+                    value={fromAccount}
+                    onChange={(e) => setFromAccount(e.target.value)}
+                    style={{
+                      padding: '12px 16px',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px'
+                    }}
+                  >
+                    {availableAccounts.map(account => (
+                      <option key={account} value={account}>
+                        {account}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="email"
+                    value={fromAccount}
+                    onChange={(e) => setFromAccount(e.target.value)}
+                    placeholder="your.email@example.com"
+                    style={{
+                      padding: '12px 16px',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      backgroundColor: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      fontSize: '14px'
+                    }}
+                  />
+                )}
               </div>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
