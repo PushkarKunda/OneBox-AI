@@ -1084,7 +1084,63 @@
   border-bottom: none;
 }
 
-/* Responsive Design */
+/* Sidebar Active States and Functionality */
+.account-item {
+  background: none !important;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.account-item:hover {
+  background: rgba(var(--primary-rgb), 0.1) !important;
+  border-color: rgba(var(--primary-rgb), 0.2) !important;
+}
+
+.account-item.active {
+  background: rgba(var(--primary-rgb), 0.15) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.filter-item {
+  transition: all 0.3s ease !important;
+}
+
+.filter-item:hover {
+  background: rgba(var(--primary-rgb), 0.1) !important;
+}
+
+.filter-item.active {
+  background: rgba(var(--primary-rgb), 0.15) !important;
+  border-left: 3px solid var(--primary-color) !important;
+  transform: translateX(4px) !important;
+}
+
+.sidebar-stats {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+.stat-icon {
+  font-size: 14px;
+}
+
+.stat-text {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .app-content {
     flex-direction: column;
@@ -1212,6 +1268,72 @@
 
 .fab-main.open {
   background: var(--error);
+}
+
+/* Modal Overlay and Container Styles */
+.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+}
+
+.compose-modal {
+  position: fixed !important;
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+  transform-origin: center center !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  opacity: 1 !important;
+}
+
+.compose-modal * {
+  filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Force modal to be crisp and clear */
+.compose-modal {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+.compose-modal *,
+.compose-modal *::before,
+.compose-modal *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+.compose-modal {
+  background: white !important;
+}
+
+/* Ensure modal buttons are always visible */
+.compose-modal button {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: flex !important;
+  pointer-events: auto !important;
+}
+
+/* Modal footer should always be visible */
+.compose-modal > div:last-child {
+  background: white !important;
+  border-top: 1px solid #e1e5e9 !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden !important;
   box-shadow: var(--shadow-lg);
 }
 
