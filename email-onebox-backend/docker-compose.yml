@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4 # Use a specific version
+    container_name: es01
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Disable security for local dev
+    ports:
+      - "9200:9200" # For API access
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+
+volumes:
+  esdata:
