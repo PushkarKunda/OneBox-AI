@@ -62,6 +62,22 @@ export interface ReplySuggestionsResponse {
   generated_at: string;
 }
 
+export interface SendEmailRequest {
+  from: string;
+  to: string;
+  cc?: string;
+  bcc?: string;
+  subject: string;
+  body: string;
+  priority?: 'low' | 'normal' | 'high';
+}
+
+export interface SendEmailResponse {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
 export const emailService = {
   searchEmails: async (query: string = '', account: string = ''): Promise<Email[]> => {
     try {
@@ -151,6 +167,29 @@ export const emailService = {
     } catch (error: any) {
       console.error('Error fetching RAG stats:', error);
       throw new Error(`Failed to fetch RAG stats: ${error.message}`);
+    }
+  },
+
+  sendEmail: async (emailData: SendEmailRequest): Promise<SendEmailResponse> => {
+    try {
+      console.log('Sending email:', emailData.subject);
+      
+      const response = await api.post<SendEmailResponse>('/send-email', emailData);
+      
+      if (response.data.success) {
+        console.log('Email sent successfully:', response.data.messageId);
+        return response.data;
+      } else {
+        throw new Error(response.data.error || 'Failed to send email');
+      }
+    } catch (error: any) {
+      console.error('Error sending email:', {
+        message: error.message,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data
+      });
+      throw new Error(`Failed to send email: ${error.response?.data?.error || error.message}`);
     }
   }
 };

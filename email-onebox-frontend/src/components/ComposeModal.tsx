@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { emailService } from '../services/api';
 
 interface ComposeModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [sending, setSending] = useState(false);
   
   // Prevent body scroll when modal is open
   React.useEffect(() => {
@@ -34,7 +36,7 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
     };
   }, [isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!emailData.to || !emailData.subject) {
@@ -42,11 +44,35 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
       return;
     }
 
-    // In a real app, you'd send the email here
-    toast.success(`Email sent successfully${emailData.priority === 'high' ? ' with high priority!' : '!'}`);
-    setEmailData({ to: '', cc: '', bcc: '', subject: '', body: '', priority: 'normal' });
-    setShowAdvanced(false);
-    onClose();
+    setSending(true);
+    
+    try {
+      const emailPayload = {
+        from: defaultAccount || 'your.email@company.com',
+        to: emailData.to,
+        cc: emailData.cc || undefined,
+        bcc: emailData.bcc || undefined,
+        subject: emailData.subject,
+        body: emailData.body,
+        priority: emailData.priority as 'low' | 'normal' | 'high'
+      };
+      
+      const response = await emailService.sendEmail(emailPayload);
+      
+      if (response.success) {
+        toast.success(`✅ Email sent successfully${emailData.priority === 'high' ? ' with high priority!' : '!'}`);
+        setEmailData({ to: '', cc: '', bcc: '', subject: '', body: '', priority: 'normal' });
+        setShowAdvanced(false);
+        onClose();
+      } else {
+        throw new Error(response.error || 'Failed to send email');
+      }
+    } catch (error: any) {
+      console.error('Send email error:', error);
+      toast.error(`❌ Failed to send email: ${error.message}`);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -433,27 +459,51 @@ const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, defaultAcc
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
-                    console.log('Send button clicked!');
-                    handleSubmit(e);
+                    if (!sending) {
+                      handleSubmit(e);
+                    }
                   }}
+                  disabled={sending}
                   style={{
                     padding: '12px 24px',
                     border: 'none',
                     borderRadius: '8px',
-                    background: '#28a745',
+                    background: sending ? '#6c757d' : (emailData.priority === 'high' ? '#dc3545' : '#28a745'),
                     color: '#ffffff',
-                    cursor: 'pointer',
+                    cursor: sending ? 'not-allowed' : 'pointer',
                     fontSize: '16px',
                     fontWeight: 'bold',
-                    display: 'block',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
                     minWidth: '150px',
                     textAlign: 'center',
-                    boxShadow: '0 4px 8px rgba(40, 167, 69, 0.3)',
+                    boxShadow: sending ? 'none' : '0 4px 8px rgba(40, 167, 69, 0.3)',
                     position: 'relative',
-                    zIndex: 999
+                    zIndex: 999,
+                    opacity: sending ? 0.7 : 1,
+                    transition: 'all 0.3s ease'
                   }}
                 >
-                  📤 SEND EMAIL
+                  {sending ? (
+                    <>
+                      <span style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid #ffffff',
+                        borderTop: '2px solid transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        display: 'inline-block'
+                      }}></span>
+                      SENDING...
+                    </>
+                  ) : (
+                    <>
+                      {emailData.priority === 'high' ? '⚡' : '📤'} SEND EMAIL
+                    </>
+                  )}
                 </button>
               </div>
             </div>
