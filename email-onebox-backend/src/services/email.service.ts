@@ -63,7 +63,7 @@ class EmailService {
         priority,
         bodyLength: body.length,
       });
-      
+
       return {
         success: true,
         messageId: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -80,7 +80,8 @@ class EmailService {
         subject: subject,
         text: body,
         html: body.replace(/\n/g, '<br>'), // Simple HTML conversion
-        priority: priority === 'high' ? 'high' : priority === 'low' ? 'low' : 'normal',
+        priority:
+          priority === 'high' ? 'high' : priority === 'low' ? 'low' : 'normal',
       };
 
       console.log(`📧 Sending real email from ${from} to ${to}: ${subject}`);
@@ -104,7 +105,7 @@ class EmailService {
       };
     } catch (error: any) {
       console.error('❌ Failed to send email:', error);
-      
+
       return {
         success: false,
         error: error.message || 'Failed to send email',
@@ -115,7 +116,8 @@ class EmailService {
   // Test email sending
   async sendTestEmail(to: string): Promise<EmailSendResult> {
     return this.sendEmail({
-      from: process.env.SMTP_USER || process.env.IMAP_USER_1 || 'test@example.com',
+      from:
+        process.env.SMTP_USER || process.env.IMAP_USER_1 || 'test@example.com',
       to,
       subject: 'Test Email from OneBox AI',
       body: `Hello!\n\nThis is a test email sent from OneBox AI at ${new Date().toLocaleString()}.\n\nBest regards,\nOneBox AI Team`,

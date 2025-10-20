@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: onebox-backend
+    runtime: node
+    plan: free
+    buildCommand: cd email-onebox-backend && npm install && npm run build
+    startCommand: cd email-onebox-backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+  
+  - type: web
+    name: onebox-frontend
+    runtime: static
+    plan: free
+    buildCommand: cd email-onebox-frontend && npm install && npm run build
+    staticPublishPath: email-onebox-frontend/build

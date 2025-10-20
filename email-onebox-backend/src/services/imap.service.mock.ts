@@ -14,8 +14,10 @@ interface EmailAccount {
 
 export const connectToImap = (config: EmailAccount): void => {
   console.log(`📧 Mock IMAP connection for ${config.user}`);
-  console.log('⚠️ IMAP service is currently mocked. Configure proper IMAP integration to sync emails.');
-  
+  console.log(
+    '⚠️ IMAP service is currently mocked. Configure proper IMAP integration to sync emails.',
+  );
+
   // Simulate connection success
   setTimeout(() => {
     console.log(`✅ Mock IMAP connection ready for ${config.user}`);

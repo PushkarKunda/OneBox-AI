@@ -17,32 +17,32 @@ import { emailService } from './services/email.service';
 
 // --- Configuration ---
 interface EmailAccount {
-    user: string;
-    password: string;
-    host: string;
-    port: number;
-    tls: boolean;
-    tlsOptions: { rejectUnauthorized: boolean };
+  user: string;
+  password: string;
+  host: string;
+  port: number;
+  tls: boolean;
+  tlsOptions: { rejectUnauthorized: boolean };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const accounts: EmailAccount[] = [
-    {
-        user: process.env.IMAP_USER_1!,
-        password: process.env.IMAP_PASSWORD_1!,
-        host: process.env.IMAP_HOST_1!,
-        port: 993,
-        tls: true,
-        tlsOptions: { rejectUnauthorized: false },
-    },
-    {
-        user: process.env.IMAP_USER_2!,
-        password: process.env.IMAP_PASSWORD_2!,
-        host: process.env.IMAP_HOST_2!,
-        port: 993,
-        tls: true,
-        tlsOptions: { rejectUnauthorized: false },
-    },
+  {
+    user: process.env.IMAP_USER_1!,
+    password: process.env.IMAP_PASSWORD_1!,
+    host: process.env.IMAP_HOST_1!,
+    port: 993,
+    tls: true,
+    tlsOptions: { rejectUnauthorized: false },
+  },
+  {
+    user: process.env.IMAP_USER_2!,
+    password: process.env.IMAP_PASSWORD_2!,
+    host: process.env.IMAP_HOST_2!,
+    port: 993,
+    tls: true,
+    tlsOptions: { rejectUnauthorized: false },
+  },
 ];
 
 const API_PORT = 3001;
@@ -56,12 +56,12 @@ async function startApp() {
   // 1. Ensure the Elasticsearch index is ready
   await createEmailIndexIfNotExists();
 
-    // 2. Start the email syncing process for all accounts (mock implementation)
-    accounts.forEach(accountConfig => {
-        if (accountConfig.user && accountConfig.password && accountConfig.host) {
-            connectToImap(accountConfig);
-        }
-    });
+  // 2. Start the email syncing process for all accounts (mock implementation)
+  accounts.forEach(accountConfig => {
+    if (accountConfig.user && accountConfig.password && accountConfig.host) {
+      connectToImap(accountConfig);
+    }
+  });
 
   // 3. Initialize RAG services
   console.log('🤖 Initializing AI services...');
@@ -140,7 +140,9 @@ async function startApp() {
         });
       }
 
-      console.log(`📧 Attempting to send email from ${from} to ${to}: ${subject}`);
+      console.log(
+        `📧 Attempting to send email from ${from} to ${to}: ${subject}`,
+      );
 
       // Use real email service
       const result = await emailService.sendEmail({
@@ -157,7 +159,7 @@ async function startApp() {
         return res.json({
           success: true,
           messageId: result.messageId,
-          message: 'Email sent successfully'
+          message: 'Email sent successfully',
         });
       } else {
         return res.status(500).json({
@@ -179,7 +181,7 @@ async function startApp() {
   app.post('/api/test-email', async (req, res) => {
     try {
       const { to } = req.body;
-      
+
       if (!to) {
         return res.status(400).json({
           success: false,
@@ -188,12 +190,12 @@ async function startApp() {
       }
 
       const result = await emailService.sendTestEmail(to);
-      
+
       if (result.success) {
         return res.json({
           success: true,
           messageId: result.messageId,
-          message: 'Test email sent successfully'
+          message: 'Test email sent successfully',
         });
       } else {
         return res.status(500).json({
@@ -216,7 +218,9 @@ async function startApp() {
     const status = emailService.getStatus();
     res.json({
       ...status,
-      message: status.initialized ? 'Email service ready' : 'Email service in fallback mode'
+      message: status.initialized
+        ? 'Email service ready'
+        : 'Email service in fallback mode',
     });
   });
 

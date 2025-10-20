@@ -152,3 +152,5 @@ email-onebox-frontend/.env.local
 email-onebox-frontend/.env.development.local
 email-onebox-frontend/.env.test.local
 email-onebox-frontend/.env.production.local
+# Local Netlify folder
+.netlify
