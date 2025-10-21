@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Email } from '../services/api';
+import { getSenderColorTheme, getSenderAvatarColor, getSenderInitials, getProviderColor } from '../utils/colorUtils';
 
 interface EmailListProps {
   emails: Email[];
@@ -83,6 +84,9 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
         const priority = getEmailPriority(email);
         const unread = isUnread(email);
         const attachment = hasAttachment(email);
+        const senderTheme = getSenderColorTheme(email._source?.from || '');
+        const accountColor = getProviderColor(email._source?.account || '');
+        const initials = getSenderInitials(email._source?.from || '');
         
         return (
           <motion.div
@@ -90,6 +94,11 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
             variants={itemVariants}
             className={`email-item ${selectedEmailId === email._id ? 'selected' : ''} ${unread ? 'unread' : 'read'} priority-${priority}`}
             onClick={() => onEmailSelect(email)}
+            style={{
+              borderLeftColor: senderTheme.primary,
+              borderLeftWidth: '4px',
+              borderLeftStyle: 'solid'
+            }}
             whileHover={{ 
               scale: 1.02,
               transition: { duration: 0.2 }
@@ -121,10 +130,18 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
               <div className="email-header">
                 <div className="email-from">
                   <div className="from-info">
-                    <div className="avatar">
-                      📧
+                    <div 
+                      className="avatar"
+                      style={{
+                        background: getSenderAvatarColor(email._source?.from || ''),
+                        color: 'white',
+                        fontWeight: 'bold',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      {initials}
                     </div>
-                    <strong className={unread ? 'unread-text' : ''}>
+                    <strong className={unread ? 'unread-text' : ''} style={{ color: senderTheme.text }}>
                       {email._source?.from?.split('<')[0]?.trim() || 'Unknown Sender'}
                     </strong>
                   </div>
@@ -155,7 +172,14 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
               </div>
               
               <div className="email-footer">
-                <span className="email-account">
+                <span 
+                  className="email-account"
+                  style={{
+                    backgroundColor: accountColor + '20', // 20% opacity
+                    color: accountColor,
+                    borderColor: accountColor + '40' // 40% opacity
+                  }}
+                >
                   📧 {email._source?.account || 'Unknown'}
                 </span>
                 <div className="email-actions">

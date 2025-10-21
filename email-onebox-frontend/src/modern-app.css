@@ -445,6 +445,82 @@
   background: var(--background-secondary);
 }
 
+/* User Color System */
+.email-item {
+  transition: all var(--transition-normal), border-left-color var(--transition-fast);
+}
+
+.email-item:hover {
+  box-shadow: var(--shadow-lg), 0 0 0 2px var(--email-primary, var(--primary));
+}
+
+.email-item.selected {
+  box-shadow: var(--shadow-colored), 0 0 0 2px var(--email-primary, var(--primary));
+  background: linear-gradient(135deg, 
+    var(--background-accent) 0%, 
+    var(--background) 100%);
+}
+
+/* Enhanced sender colors */
+.email-from strong {
+  transition: color var(--transition-fast);
+}
+
+/* Account badge styling */
+.email-account {
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.email-account:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Provider-specific styling */
+.email-account[data-provider="gmail"] {
+  background-color: #EA433520 !important;
+  color: #EA4335 !important;
+  border-color: #EA433540 !important;
+}
+
+.email-account[data-provider="outlook"] {
+  background-color: #0078D420 !important;
+  color: #0078D4 !important;
+  border-color: #0078D440 !important;
+}
+
+.email-account[data-provider="yahoo"] {
+  background-color: #6001D220 !important;
+  color: #6001D2 !important;
+  border-color: #6001D240 !important;
+}
+
+/* Avatar enhancements */
+.avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-fast);
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Color pulse animation for unread emails */
+@keyframes colorPulse {
+  0%, 100% { 
+    border-left-color: var(--success); 
+  }
+  50% { 
+    border-left-color: var(--primary); 
+  }
+}
+
+.email-item.unread {
+  animation: colorPulse 3s ease-in-out infinite;
+}
+
 .email-list.empty {
   display: flex;
   align-items: center;
@@ -712,6 +788,7 @@
   background: linear-gradient(145deg, var(--background-secondary) 0%, var(--background-tertiary) 100%);
   backdrop-filter: blur(10px);
   position: relative;
+  transition: all var(--transition-normal);
 }
 
 .email-detail-header::before {

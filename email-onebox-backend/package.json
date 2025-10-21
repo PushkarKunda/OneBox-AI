@@ -37,10 +37,9 @@
     "prettier": "^3.2.5"
   },
   "dependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
     "@elastic/elasticsearch": "^8.19.1",
     "@huggingface/inference": "^4.11.3",
+    "@types/imap": "^0.8.42",
     "@types/nodemailer": "^7.0.2",
     "axios": "^1.12.2",
     "chromadb": "^3.0.17",
@@ -53,6 +52,8 @@
     "mailparser": "^3.7.5",
     "nodemailer": "^7.0.9",
     "openai": "^6.5.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "uuid": "^13.0.0"
   },
   "lint-staged": {

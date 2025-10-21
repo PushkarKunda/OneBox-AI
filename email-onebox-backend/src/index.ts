@@ -5,8 +5,8 @@ dotenv.config();
 // Now, import everything else
 import express from 'express';
 import cors from 'cors';
-// import Imap from 'node-imap';
-import { connectToImap } from './services/imap.service.mock';
+import { performanceMiddleware, getPerformanceStats } from './middleware/performance.middleware';
+import { connectToImap } from './services/imap.service';
 import {
   createEmailIndexIfNotExists,
   searchEmails,
@@ -73,6 +73,9 @@ async function startApp() {
   app.use(cors());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true }));
+  
+  // Add performance monitoring middleware
+  app.use(performanceMiddleware);
 
   app.get('/api/emails', async (req, res) => {
     const query = (req.query.q as string) || '';
@@ -221,6 +224,16 @@ async function startApp() {
       message: status.initialized
         ? 'Email service ready'
         : 'Email service in fallback mode',
+    });
+  });
+
+  // Performance monitoring endpoint
+  app.get('/api/performance', (_req, res) => {
+    const stats = getPerformanceStats();
+    res.json({
+      success: true,
+      performance: stats,
+      timestamp: new Date().toISOString()
     });
   });
 

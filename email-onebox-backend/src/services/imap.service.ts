@@ -1,4 +1,4 @@
-import Imap from 'node-imap';
+import Imap = require('imap');
 import { ParsedMail, simpleParser } from 'mailparser';
 import { getAddressText, indexEmail } from './elasticsearch.service';
 import { categorizeEmail } from './ai.service';

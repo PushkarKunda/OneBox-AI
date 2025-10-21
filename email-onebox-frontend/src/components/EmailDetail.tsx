@@ -5,6 +5,7 @@ import { Email } from '../services/api';
 import ReplySuggestions from './ReplySuggestions';
 import ReadingTime from './ReadingTime';
 import ScrollProgress from './ScrollProgress';
+import { getSenderColorTheme, getSenderAvatarColor, getSenderInitials, getProviderColor } from '../utils/colorUtils';
 
 interface EmailDetailProps {
   email: Email | null;
@@ -116,18 +117,39 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email }) => {
     setShowReplyComposer(false);
   };
 
+  const senderTheme = getSenderColorTheme(email._source?.from || '');
+  const accountColor = getProviderColor(email._source?.account || '');
+  const initials = getSenderInitials(email._source?.from || '');
+
   return (
     <div className="email-detail">
       <ScrollProgress target={emailBodyRef as React.RefObject<HTMLElement>} />
-      <div className="email-detail-header">
+      <div className="email-detail-header" style={{ borderTopColor: senderTheme.primary, borderTopWidth: '4px', borderTopStyle: 'solid' }}>
         <div className="email-subject-header">
-          <h2 className="email-detail-subject">{email._source?.subject || 'No Subject'}</h2>
+          <h2 className="email-detail-subject" style={{ color: senderTheme.text }}>{email._source?.subject || 'No Subject'}</h2>
           <ReadingTime text={email._source?.body || ''} className="email-reading-time" />
         </div>
         <div className="email-detail-meta">
           <div className="email-detail-from">
             <strong>From:</strong> 
-            <span className="email-from-value">
+            <span className="email-from-value" style={{ backgroundColor: senderTheme.secondary, color: senderTheme.text, borderColor: senderTheme.border }}>
+              <span 
+                style={{
+                  display: 'inline-block',
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  background: getSenderAvatarColor(email._source?.from || ''),
+                  color: 'white',
+                  fontSize: '10px',
+                  textAlign: 'center',
+                  lineHeight: '20px',
+                  marginRight: '8px',
+                  fontWeight: 'bold'
+                }}
+              >
+                {initials}
+              </span>
               {email._source?.from || 'Unknown'}
             </span>
           </div>
@@ -145,7 +167,7 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email }) => {
           </div>
           <div className="email-detail-account">
             <strong>Account:</strong> 
-            <span className="email-account-value">
+            <span className="email-account-value" style={{ backgroundColor: accountColor, color: 'white' }}>
               {email._source?.account || 'Unknown'}
             </span>
           </div>
