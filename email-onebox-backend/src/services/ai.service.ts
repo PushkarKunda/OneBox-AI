@@ -1,9 +1,10 @@
 import { HfInference } from '@huggingface/inference';
 
-// Initialize Hugging Face client using the token from your .env file
-const hf = new HfInference(process.env.HUGGINGFACE_API_TOKEN);
+const hfToken = process.env.HUGGINGFACE_API_KEY || process.env.HUGGINGFACE_API_TOKEN;
+const isValidToken = Boolean(hfToken && !hfToken.includes('your-huggingface-api-key'));
 
-// Define the possible categories and the specific open-source model we'll use
+const hf = isValidToken ? new HfInference(hfToken) : null;
+
 export type EmailCategory =
   | 'Interested'
   | 'Meeting Booked'
@@ -11,23 +12,47 @@ export type EmailCategory =
   | 'Spam'
   | 'Out of Office'
   | 'Uncategorized';
+
 const CLASSIFICATION_MODEL = 'facebook/bart-large-mnli';
 
 /**
- * Categorizes an email using a free Hugging Face zero-shot classification model.
- * @param subject The subject line of the email.
- * @param body The text content of the email.
- * @returns A promise that resolves to an EmailCategory.
+ * Basic rule-based fallback categorization based on subject/body keywords.
+ */
+const ruleBasedCategorize = (subject: string, body: string): EmailCategory => {
+  const text = `${subject} ${body}`.toLowerCase();
+
+  if (text.includes('out of office') || text.includes('ooo') || text.includes('auto-reply') || text.includes('autoreply')) {
+    return 'Out of Office';
+  }
+  if (text.includes('unsubscribe') || text.includes('win $') || text.includes('lottery') || text.includes('advertisement')) {
+    return 'Spam';
+  }
+  if (text.includes('interview') || text.includes('meeting') || text.includes('scheduled') || text.includes('calendar') || text.includes('demo')) {
+    return 'Meeting Booked';
+  }
+  if (text.includes('interested') || text.includes('hiring') || text.includes('apply') || text.includes('opportunity') || text.includes('job') || text.includes('trainee manager')) {
+    return 'Interested';
+  }
+  if (text.includes('not interested') || text.includes('decline') || text.includes('pass on this')) {
+    return 'Not Interested';
+  }
+
+  return 'Uncategorized';
+};
+
+/**
+ * Categorizes an email using Hugging Face zero-shot classification model or rule-based fallback.
  */
 export const categorizeEmail = async (
   subject: string,
   body: string,
 ): Promise<EmailCategory> => {
-  try {
-    // Combine subject and body for better context
-    const inputText = `Subject: ${subject}\n\nBody: ${body}`;
+  if (!hf) {
+    return ruleBasedCategorize(subject, body);
+  }
 
-    // These are the categories the model will choose from
+  try {
+    const inputText = `Subject: ${subject}\n\nBody: ${body}`;
     const candidateLabels: EmailCategory[] = [
       'Interested',
       'Meeting Booked',
@@ -38,17 +63,14 @@ export const categorizeEmail = async (
 
     const response = await hf.zeroShotClassification({
       model: CLASSIFICATION_MODEL,
-      inputs: inputText.substring(0, 1024), // Truncate to avoid exceeding model limits
+      inputs: inputText.substring(0, 1024),
       parameters: {
         candidate_labels: candidateLabels,
       },
     });
 
-    // The response is an array of labels and scores, sorted from highest to lowest
     if (response && response.length > 0) {
       const topCategory = response[0];
-
-      // We set a confidence threshold to avoid making bad guesses
       if (topCategory.score > 0.7) {
         console.log(
           `HF Classified as "${topCategory.label}" with score ${topCategory.score.toFixed(2)}`,
@@ -57,12 +79,9 @@ export const categorizeEmail = async (
       }
     }
 
-    console.log(
-      'HF classification confidence was too low, defaulting to Uncategorized.',
-    );
-    return 'Uncategorized';
-  } catch (error) {
-    console.error('Error categorizing email with Hugging Face:', error);
-    return 'Uncategorized'; // Return a default category if there's an API error
+    return ruleBasedCategorize(subject, body);
+  } catch (error: any) {
+    console.warn(`⚠️ Hugging Face API classification skipped (${error.message || 'Auth issue'}). Using rule-based categorization.`);
+    return ruleBasedCategorize(subject, body);
   }
 };

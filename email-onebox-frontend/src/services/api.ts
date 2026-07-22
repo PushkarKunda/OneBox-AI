@@ -18,6 +18,7 @@ export interface Email {
     body: string;
     account: string;
     boxName: string;
+    category?: string;
   };
 }
 
@@ -108,7 +109,8 @@ export const emailService = {
             date: email.date,
             body: email.text || email.body || '',
             account: email.account || 'Unknown',
-            boxName: email.boxName || 'INBOX'
+            boxName: email.boxName || 'INBOX',
+            category: email.category || 'Uncategorized'
           }
         }));
       } else {
@@ -190,6 +192,26 @@ export const emailService = {
         data: error.response?.data
       });
       throw new Error(`Failed to send email: ${error.response?.data?.error || error.message}`);
+    }
+  },
+
+  getAccounts: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/accounts');
+      return response.data?.accounts || [];
+    } catch (error: any) {
+      console.error('Error fetching accounts:', error);
+      return [{ user: 'demo@onebox.ai', host: 'imap.onebox.ai', status: 'connected' }];
+    }
+  },
+
+  connectAccount: async (accountData: { user: string; password?: string; host?: string; provider?: string }): Promise<any> => {
+    try {
+      const response = await api.post('/accounts/connect', accountData);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error connecting account:', error);
+      throw new Error(error.response?.data?.error || 'Failed to connect account');
     }
   }
 };

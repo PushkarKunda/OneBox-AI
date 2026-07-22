@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,8 +26,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   emails,
   activeFilter
 }) => {
-  // Using modern theme-aware sidebar design
-
   // Calculate dynamic counts from emails
   const getCountForFolder = (folderId: string) => {
     if (!emails || emails.length === 0) return 0;
@@ -52,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           email._source?.subject?.includes('⭐') || 
           email._source?.subject?.toLowerCase().includes('important') ||
           email._source?.subject?.toLowerCase().includes('urgent') ||
-          (email._id?.length || 0) % 5 === 0 // Deterministic "starred" logic
+          (email._id?.length || 0) % 5 === 0
         ).length;
       case 'archive':
         return emails.filter(email => 
@@ -83,10 +80,38 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: 'important', name: 'Important', icon: '❗', filter: true },
   ];
 
-  const accounts = [
+  // Derive dynamic account list
+  const dynamicAccountSet = new Set<string>();
+  if (emails && Array.isArray(emails)) {
+    emails.forEach(e => {
+      if (e._source?.account) {
+        dynamicAccountSet.add(e._source.account);
+      }
+    });
+  }
+
+  const accountList = [
     { id: '', name: 'All Accounts', icon: '📧', active: selectedAccount === '' },
-    { id: 'work@company.com', name: 'work@company.com', icon: '🏢', active: selectedAccount === 'work@company.com' },
-    { id: 'personal@email.com', name: 'personal@email.com', icon: '👤', active: selectedAccount === 'personal@email.com' },
+    ...Array.from(dynamicAccountSet).map(acc => ({
+      id: acc,
+      name: acc,
+      icon: acc.includes('gmail') ? '🔴' : acc.includes('onebox') ? '⚡' : '💼',
+      active: selectedAccount === acc
+    }))
+  ];
+
+  // Derive AI category counts
+  const getCategoryCount = (categoryName: string) => {
+    if (!emails || !Array.isArray(emails)) return 0;
+    return emails.filter(e => e._source?.category === categoryName).length;
+  };
+
+  const aiCategories = [
+    { id: 'cat:Interested', name: 'Interested', icon: '🟢', count: getCategoryCount('Interested'), color: '#10b981' },
+    { id: 'cat:Meeting Booked', name: 'Meeting Booked', icon: '📅', count: getCategoryCount('Meeting Booked'), color: '#8b5cf6' },
+    { id: 'cat:Out of Office', name: 'Out of Office', icon: '🏖️', count: getCategoryCount('Out of Office'), color: '#06b6d4' },
+    { id: 'cat:Not Interested', name: 'Not Interested', icon: '✋', count: getCategoryCount('Not Interested'), color: '#f59e0b' },
+    { id: 'cat:Spam', name: 'Spam', icon: '🚫', count: getCategoryCount('Spam'), color: '#ef4444' },
   ];
 
   return (
@@ -111,10 +136,10 @@ const Sidebar: React.FC<SidebarProps> = ({
           >
             <div className="sidebar-header">
               <div className="sidebar-brand">
-                <div className="brand-icon">📧</div>
+                <div className="brand-icon">⚡</div>
                 <div className="brand-info">
-                  <h2 className="brand-title">MailBox</h2>
-                  <span className="brand-subtitle">Professional Email</span>
+                  <h2 className="brand-title">OneBox AI</h2>
+                  <span className="brand-subtitle">Smart Inbox Workspace</span>
                 </div>
               </div>
               <motion.button 
@@ -142,7 +167,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="sidebar-section">
                 <h3 className="section-title">Email Accounts</h3>
                 <div className="section-content">
-                  {accounts.map((account, index) => (
+                  {accountList.map((account, index) => (
                     <motion.button
                       key={account.id}
                       className={`account-item ${account.active ? 'active' : ''}`}
@@ -190,6 +215,37 @@ const Sidebar: React.FC<SidebarProps> = ({
                         >
                           {folder.count}
                         </motion.span>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sidebar-section">
+                <h3 className="section-title">🤖 AI Categories</h3>
+                <div className="section-content">
+                  {aiCategories.map((cat, index) => (
+                    <motion.button
+                      key={cat.id}
+                      className={`filter-item ${activeFilter === cat.id ? 'active' : ''}`}
+                      onClick={() => onQuickFilter(cat.id)}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      whileHover={{ x: 4, scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="filter-content">
+                        <span className="filter-icon">{cat.icon}</span>
+                        <span className="filter-name">{cat.name}</span>
+                      </div>
+                      {cat.count > 0 && (
+                        <span 
+                          className="folder-count" 
+                          style={{ backgroundColor: cat.color + '25', color: cat.color }}
+                        >
+                          {cat.count}
+                        </span>
                       )}
                     </motion.button>
                   ))}

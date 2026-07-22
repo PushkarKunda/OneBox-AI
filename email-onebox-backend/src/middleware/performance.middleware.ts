@@ -6,8 +6,8 @@ interface PerformanceMetric {
   duration: number;
   timestamp: Date;
   statusCode: number;
-  userAgent?: string;
-  ip?: string;
+  userAgent?: string | undefined;
+  ip?: string | undefined;
 }
 
 class PerformanceMonitor {
@@ -109,7 +109,7 @@ export const performanceMiddleware = (req: Request, res: Response, next: NextFun
       duration,
       timestamp: new Date(),
       statusCode: res.statusCode,
-      userAgent: req.headers['user-agent'],
+      userAgent: Array.isArray(req.headers['user-agent']) ? req.headers['user-agent'][0] : req.headers['user-agent'],
       ip: req.ip || req.socket.remoteAddress
     });
 

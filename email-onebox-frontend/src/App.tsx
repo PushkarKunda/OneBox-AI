@@ -13,6 +13,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { Email, emailService } from './services/api';
 import FloatingActionButton from './components/FloatingActionButton';
 import ComposeModal from './components/ComposeModal';
+import { ConnectAccountModal } from './components/ConnectAccountModal';
 
 interface SearchFilters {
   query: string;
@@ -36,6 +37,7 @@ function App() {
   const [selectedAccount, setSelectedAccount] = useState('');
   const [activeFilter, setActiveFilter] = useState('');
   const [showComposeModal, setShowComposeModal] = useState(false);
+  const [showConnectModal, setShowConnectModal] = useState(false);
 
   // Filter emails based on selected folder and active filters
   const filterEmails = (emailList: Email[], folder: string, quickFilter: string) => {
@@ -84,41 +86,44 @@ function App() {
     
     // Apply quick filter if active
     if (quickFilter) {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      switch (quickFilter) {
-        case 'unread':
-          // Deterministic "unread" logic based on email properties
-          filtered = filtered.filter(email => 
-            (email._id?.length || 0) % 3 === 0 || 
-            email._source?.subject?.toLowerCase().includes('new')
-          );
-          break;
-        case 'today':
-          filtered = filtered.filter(email => {
-            const emailDate = new Date(email._source?.date);
-            emailDate.setHours(0, 0, 0, 0);
-            return emailDate.getTime() === today.getTime();
-          });
-          break;
-        case 'attachments':
-          // Deterministic attachment logic
-          filtered = filtered.filter(email => 
-            email._source?.body?.toLowerCase().includes('attachment') || 
-            email._source?.body?.toLowerCase().includes('attached') ||
-            email._source?.subject?.toLowerCase().includes('attachment') ||
-            (email._id?.length || 0) % 4 === 0
-          );
-          break;
-        case 'important':
-          filtered = filtered.filter(email => 
-            email._source?.subject?.includes('URGENT') || 
-            email._source?.subject?.toLowerCase().includes('important') ||
-            email._source?.subject?.toLowerCase().includes('priority') ||
-            email._source?.from?.toLowerCase().includes('noreply') === false
-          );
-          break;
+      if (quickFilter.startsWith('cat:')) {
+        const targetCategory = quickFilter.replace('cat:', '');
+        filtered = filtered.filter(email => (email._source as any)?.category === targetCategory);
+      } else {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        switch (quickFilter) {
+          case 'unread':
+            filtered = filtered.filter(email => 
+              (email._id?.length || 0) % 3 === 0 || 
+              email._source?.subject?.toLowerCase().includes('new')
+            );
+            break;
+          case 'today':
+            filtered = filtered.filter(email => {
+              const emailDate = new Date(email._source?.date);
+              emailDate.setHours(0, 0, 0, 0);
+              return emailDate.getTime() === today.getTime();
+            });
+            break;
+          case 'attachments':
+            filtered = filtered.filter(email => 
+              email._source?.body?.toLowerCase().includes('attachment') || 
+              email._source?.body?.toLowerCase().includes('attached') ||
+              email._source?.subject?.toLowerCase().includes('attachment') ||
+              (email._id?.length || 0) % 4 === 0
+            );
+            break;
+          case 'important':
+            filtered = filtered.filter(email => 
+              email._source?.subject?.includes('URGENT') || 
+              email._source?.subject?.toLowerCase().includes('important') ||
+              email._source?.subject?.toLowerCase().includes('priority') ||
+              email._source?.from?.toLowerCase().includes('noreply') === false
+            );
+            break;
+        }
       }
     }
     
@@ -283,6 +288,7 @@ function App() {
           onRefresh={handleRefresh}
           refreshing={refreshing}
           unreadCount={unreadCount}
+          onOpenConnectModal={() => setShowConnectModal(true)}
         />
         
         <div className="main-layout">
@@ -375,6 +381,15 @@ function App() {
           onClose={() => setShowComposeModal(false)}
           defaultAccount={currentFromAccount}
           availableAccounts={availableAccounts}
+        />
+
+        <ConnectAccountModal
+          isOpen={showConnectModal}
+          onClose={() => setShowConnectModal(false)}
+          onAccountAdded={(acc) => {
+            toast.success(`Account ${acc} connected!`);
+            handleRefresh();
+          }}
         />
         
         <ToastContainer

@@ -70,6 +70,7 @@ const ReplySuggestions: React.FC<ReplySuggestionsProps> = ({
     if (isOpen && email) {
       generateSuggestions();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, email]);
 
   const generateSuggestions = async () => {

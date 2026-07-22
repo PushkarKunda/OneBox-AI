@@ -1,19 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import ThemeSelector from './ThemeSelector';
+import './ConnectAccountModal.css';
 
 interface HeaderProps {
   onMenuToggle: () => void;
   onRefresh: () => void;
   refreshing: boolean;
   unreadCount: number;
+  onOpenConnectModal?: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   onMenuToggle, 
   onRefresh, 
   refreshing, 
-  unreadCount 
+  unreadCount,
+  onOpenConnectModal
 }) => {
   // Theme context is used by ThemeSelector component
 
@@ -76,6 +79,17 @@ const Header: React.FC<HeaderProps> = ({
           </div>
 
           <div className="header-actions">
+            {onOpenConnectModal && (
+              <motion.button
+                className="connect-account-btn"
+                onClick={onOpenConnectModal}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+              >
+                <span>⚡</span> Connect Account
+              </motion.button>
+            )}
+
             <motion.button 
               className={`refresh-btn ${refreshing ? 'spinning' : ''}`}
               onClick={onRefresh}

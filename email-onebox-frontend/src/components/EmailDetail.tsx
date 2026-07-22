@@ -121,12 +121,38 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email }) => {
   const accountColor = getProviderColor(email._source?.account || '');
   const initials = getSenderInitials(email._source?.from || '');
 
+  const getCategoryBadge = (category?: string) => {
+    if (!category || category === 'Uncategorized') return null;
+    
+    const config: Record<string, { icon: string; bg: string; color: string; border: string }> = {
+      'Interested': { icon: '🟢', bg: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: 'rgba(16, 185, 129, 0.3)' },
+      'Meeting Booked': { icon: '📅', bg: 'rgba(139, 92, 246, 0.15)', color: '#a78bfa', border: 'rgba(139, 92, 246, 0.3)' },
+      'Out of Office': { icon: '🏖️', bg: 'rgba(6, 182, 212, 0.15)', color: '#22d3ee', border: 'rgba(6, 182, 212, 0.3)' },
+      'Not Interested': { icon: '✋', bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)' },
+      'Spam': { icon: '🚫', bg: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: 'rgba(239, 68, 68, 0.3)' },
+    };
+
+    const style = config[category] || { icon: '🏷️', bg: 'rgba(148, 163, 184, 0.15)', color: '#cbd5e1', border: 'rgba(148, 163, 184, 0.3)' };
+
+    return (
+      <span 
+        className="px-3 py-1 rounded-full text-xs font-semibold inline-flex items-center gap-1.5 border shadow-sm ml-2"
+        style={{ backgroundColor: style.bg, color: style.color, borderColor: style.border }}
+      >
+        <span>{style.icon}</span> {category}
+      </span>
+    );
+  };
+
   return (
     <div className="email-detail">
       <ScrollProgress target={emailBodyRef as React.RefObject<HTMLElement>} />
       <div className="email-detail-header" style={{ borderTopColor: senderTheme.primary, borderTopWidth: '4px', borderTopStyle: 'solid' }}>
-        <div className="email-subject-header">
-          <h2 className="email-detail-subject" style={{ color: senderTheme.text }}>{email._source?.subject || 'No Subject'}</h2>
+        <div className="email-subject-header flex items-center justify-between">
+          <div className="flex items-center flex-wrap gap-2">
+            <h2 className="email-detail-subject" style={{ color: senderTheme.text }}>{email._source?.subject || 'No Subject'}</h2>
+            {getCategoryBadge((email._source as any)?.category)}
+          </div>
           <ReadingTime text={email._source?.body || ''} className="email-reading-time" />
         </div>
         <div className="email-detail-meta">
@@ -181,26 +207,27 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email }) => {
           )}
         </div>
         
-        <div className="email-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
+        <div className="email-actions" style={{ marginTop: '1rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <motion.button
             onClick={handleOpenReplySuggestions}
             style={{
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
               color: 'white',
               border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '0.9rem',
               fontWeight: '600',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)'
             }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
           >
-            🤖 AI Reply Suggestions
+            ⚡ Smart AI Reply (RAG)
           </motion.button>
           
           <motion.button
@@ -209,14 +236,15 @@ const EmailDetail: React.FC<EmailDetailProps> = ({ email }) => {
               background: '#10b981',
               color: 'white',
               border: 'none',
-              padding: '0.5rem 1rem',
-              borderRadius: '6px',
+              padding: '0.6rem 1.2rem',
+              borderRadius: '8px',
               cursor: 'pointer',
               fontSize: '0.9rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              boxShadow: '0 4px 12px rgba(16, 185, 129, 0.2)'
             }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
           >
             ✍️ Reply
           </motion.button>
