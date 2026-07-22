@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdvancedSearchBarProps {
-  onSearch: (query: string, filters: SearchFilters) => void;
+  onSearch: (query: string, filters: SearchFilters, isSemantic?: boolean) => void;
   loading: boolean;
 }
 
@@ -19,6 +19,7 @@ interface SearchFilters {
 const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({ onSearch, loading }) => {
   const [query, setQuery] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isSemantic, setIsSemantic] = useState(true);
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     account: '',
@@ -32,7 +33,7 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({ onSearch, loading
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const searchFilters = { ...filters, query };
-    onSearch(query, searchFilters);
+    onSearch(query, searchFilters, isSemantic);
   };
 
   const clearFilters = () => {
@@ -61,10 +62,10 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({ onSearch, loading
         layout
       >
         <div className="search-input-container">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon">{isSemantic ? '🧠' : '🔍'}</span>
           <input
             type="text"
-            placeholder="Search emails, content, attachments..."
+            placeholder={isSemantic ? "Semantic AI Search (e.g. 'find emails discussing pricing or scheduling calls')..." : "Search emails, content, attachments..."}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="search-input-enhanced"
@@ -72,6 +73,32 @@ const AdvancedSearchBar: React.FC<AdvancedSearchBarProps> = ({ onSearch, loading
           />
           
           <div className="search-actions">
+            <motion.button
+              type="button"
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 border transition cursor-pointer ${isSemantic ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/40' : 'bg-slate-800 text-slate-400 border-slate-700'}`}
+              onClick={() => setIsSemantic(!isSemantic)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Toggle Semantic AI Vector Search"
+              style={{
+                backgroundColor: isSemantic ? 'rgba(99, 102, 241, 0.18)' : 'rgba(30, 41, 59, 0.5)',
+                color: isSemantic ? '#818cf8' : '#94a3b8',
+                borderColor: isSemantic ? 'rgba(99, 102, 241, 0.4)' : 'rgba(255, 255, 255, 0.1)',
+                padding: '0.3rem 0.6rem',
+                borderRadius: '8px',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+              }}
+            >
+              <span>🧠</span> {isSemantic ? 'Semantic RAG' : 'Exact Match'}
+            </motion.button>
+
             <motion.button
               type="button"
               className={`filter-toggle ${showAdvanced ? 'active' : ''} ${hasActiveFilters ? 'has-filters' : ''}`}

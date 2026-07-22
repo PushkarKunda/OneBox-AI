@@ -43,6 +43,25 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
     );
   };
 
+  const getSemanticBadge = (similarityScore?: number, matchReason?: string) => {
+    if (!similarityScore || similarityScore < 0.3) return null;
+
+    const matchPct = Math.round(similarityScore * 100);
+    const badgeColor = matchPct >= 75 ? '#818cf8' : matchPct >= 55 ? '#34d399' : '#fbbf24';
+    const bg = matchPct >= 75 ? 'rgba(99, 102, 241, 0.18)' : matchPct >= 55 ? 'rgba(16, 185, 129, 0.18)' : 'rgba(245, 158, 11, 0.18)';
+    const border = matchPct >= 75 ? 'rgba(99, 102, 241, 0.35)' : matchPct >= 55 ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.35)';
+
+    return (
+      <span 
+        className="px-2 py-0.5 rounded-full text-[11px] font-bold inline-flex items-center gap-1 border shadow-sm"
+        style={{ backgroundColor: bg, color: badgeColor, borderColor: border }}
+        title={matchReason || 'Vector Similarity'}
+      >
+        <span>🧠</span> {matchPct}% Match {matchReason ? `• ${matchReason}` : ''}
+      </span>
+    );
+  };
+
   if (emails.length === 0) {
     return (
       <div className="email-list empty">
@@ -198,6 +217,7 @@ const EmailList: React.FC<EmailListProps> = ({ emails, onEmailSelect, selectedEm
                     📧 {email._source?.account || 'Inbox'}
                   </span>
                   {getCategoryBadge((email._source as any)?.category)}
+                  {getSemanticBadge((email._source as any)?.similarityScore, (email._source as any)?.matchReason)}
                 </div>
                 <div className="email-actions">
                   <motion.button

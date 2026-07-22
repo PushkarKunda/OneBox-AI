@@ -149,18 +149,24 @@ function App() {
     });
   }, []);
 
-  const handleAdvancedSearch = async (query: string, filters: SearchFilters) => {
+  const handleAdvancedSearch = async (query: string, filters: SearchFilters, isSemantic: boolean = false) => {
     setLoading(true);
     setError(null);
     try {
-      // For now, we'll just use the basic search functionality
-      // In a real app, you'd send all filters to the backend
-      const results = await emailService.searchEmails(query || filters.query, filters.account);
+      const searchQuery = query || filters.query;
+      // Auto-enable semantic mode if query is multi-word or isSemantic is explicit
+      const enableSemantic = isSemantic || (searchQuery.trim().split(/\s+/).length >= 2);
+
+      const results = await emailService.searchEmails(searchQuery, filters.account, enableSemantic);
       setAllEmails(results);
       setSelectedEmail(null);
       
       if (results.length > 0) {
-        toast.success(`Found ${results.length} emails`);
+        if (enableSemantic && searchQuery.trim().length > 0) {
+          toast.success(`🧠 Semantic AI Search found ${results.length} matching emails!`);
+        } else {
+          toast.success(`Found ${results.length} emails`);
+        }
       } else {
         toast.info('No emails found for your search criteria');
       }

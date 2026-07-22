@@ -19,6 +19,8 @@ export interface Email {
     account: string;
     boxName: string;
     category?: string;
+    similarityScore?: number;
+    matchReason?: string;
   };
 }
 
@@ -80,14 +82,15 @@ export interface SendEmailResponse {
 }
 
 export const emailService = {
-  searchEmails: async (query: string = '', account: string = ''): Promise<Email[]> => {
+  searchEmails: async (query: string = '', account: string = '', isSemantic: boolean = false): Promise<Email[]> => {
     try {
-      console.log('Making API request to:', `${API_BASE_URL}/emails`, { q: query, account });
+      console.log('Making API request to:', `${API_BASE_URL}/emails`, { q: query, account, semantic: isSemantic });
       
       const response = await api.get<any>('/emails', {
         params: {
           q: query,
-          account: account
+          account: account,
+          semantic: isSemantic
         }
       });
       
@@ -102,15 +105,17 @@ export const emailService = {
         return response.data.map((email: any) => ({
           _id: email._id || email.messageId || Math.random().toString(),
           _source: {
-            messageId: email.messageId || email._id,
-            from: email.from,
-            to: Array.isArray(email.to) ? email.to : [email.to],
-            subject: email.subject,
-            date: email.date,
-            body: email.text || email.body || '',
-            account: email.account || 'Unknown',
-            boxName: email.boxName || 'INBOX',
-            category: email.category || 'Uncategorized'
+            messageId: email.messageId || email._id || (email._source && email._source.messageId),
+            from: email.from || (email._source && email._source.from),
+            to: Array.isArray(email.to) ? email.to : (email._source?.to || [email.to]),
+            subject: email.subject || (email._source && email._source.subject),
+            date: email.date || (email._source && email._source.date),
+            body: email.text || email.body || (email._source && email._source.body) || '',
+            account: email.account || (email._source && email._source.account) || 'Unknown',
+            boxName: email.boxName || (email._source && email._source.boxName) || 'INBOX',
+            category: email.category || (email._source && email._source.category) || 'Uncategorized',
+            similarityScore: email.similarityScore || (email._source && email._source.similarityScore),
+            matchReason: email.matchReason || (email._source && email._source.matchReason)
           }
         }));
       } else {

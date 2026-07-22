@@ -132,8 +132,25 @@ async function startApp() {
   app.get('/api/emails', async (req, res) => {
     const query = (req.query.q as string) || '';
     const account = (req.query.account as string) || '';
+    const isSemantic = req.query.semantic === 'true';
 
-    const emails = await searchEmails(query, account);
+    let emails = await searchEmails(query, account);
+
+    if (isSemantic && query.trim().length > 0) {
+      const semanticResults = await vectorService.semanticSearchEmails(query, emails);
+      emails = semanticResults.map(item => {
+        const copy = JSON.parse(JSON.stringify(item.email));
+        if (copy._source) {
+          copy._source.similarityScore = item.similarity;
+          copy._source.matchReason = item.matchReason;
+        } else {
+          copy.similarityScore = item.similarity;
+          copy.matchReason = item.matchReason;
+        }
+        return copy;
+      });
+    }
+
     return res.json(emails);
   });
 

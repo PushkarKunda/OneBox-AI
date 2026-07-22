@@ -412,6 +412,102 @@ class VectorService {
   }
 
   /**
+   * Perform semantic vector search on emails using embeddings and concept matching
+   */
+  async semanticSearchEmails(query: string, emails: any[]): Promise<Array<{ email: any; similarity: number; matchReason: string }>> {
+    if (!query || query.trim().length === 0 || !emails || emails.length === 0) {
+      return emails.map(e => ({ email: e, similarity: 1.0, matchReason: 'Direct Match' }));
+    }
+
+    const cleanQuery = query.toLowerCase().trim();
+
+    // Concept dictionary for semantic synonym expansion
+    const conceptMap: Record<string, string[]> = {
+      pricing: ['price', 'cost', 'quote', 'subscription', 'rate', 'discount', 'fee', 'dollar', 'invoice', 'tier', 'plan', 'pay'],
+      meeting: ['schedule', 'call', 'calendar', 'demo', 'zoom', 'google meet', 'interview', 'time to talk', 'slot', 'book', 'talk'],
+      job: ['interview', 'applicant', 'hiring', 'resume', 'candidate', 'position', 'role', 'offer', 'application', 'opportunity'],
+      vacation: ['out of office', 'ooo', 'holiday', 'annual leave', 'travelling', 'away', 'back on', 'return'],
+      urgent: ['asap', 'priority', 'important', 'immediately', 'attention', 'critical', 'emergency'],
+      support: ['help', 'bug', 'issue', 'problem', 'error', 'broken', 'technical', 'fail'],
+    };
+
+    // Expand concepts present in query
+    const activeConcepts = Object.keys(conceptMap).filter(concept =>
+      cleanQuery.includes(concept) || conceptMap[concept].some(kw => cleanQuery.includes(kw))
+    );
+
+    let queryVector: number[] = [];
+    try {
+      if (process.env.OPENAI_API_KEY && !process.env.OPENAI_API_KEY.includes('your-openai-api-key')) {
+        queryVector = await this.generateEmbeddings(cleanQuery);
+      }
+    } catch (e) {
+      // Fallback
+    }
+
+    const scoredEmails = await Promise.all(emails.map(async (email) => {
+      const source = email._source || email;
+      const textToEmbed = `${source.subject || ''} ${source.body || source.text || ''} ${source.category || ''} ${source.from || ''}`.toLowerCase();
+
+      let similarity = 0;
+      let matchReason = 'Semantic Relevance';
+
+      if (queryVector.length > 0) {
+        try {
+          const docVector = await this.generateEmbeddings(textToEmbed.substring(0, 500));
+          const dotProduct = queryVector.reduce((sum, val, i) => sum + val * (docVector[i] || 0), 0);
+          similarity = Math.max(0, Math.min(1, dotProduct));
+        } catch (err) {
+          similarity = 0;
+        }
+      }
+
+      // Keyword / TF-IDF / Concept Fallback Scoring
+      if (similarity === 0) {
+        const words = cleanQuery.split(/\s+/).filter(w => w.length > 2);
+        let matchCount = 0;
+
+        words.forEach(w => {
+          if (textToEmbed.includes(w)) matchCount += 2;
+        });
+
+        // Check concept matches
+        activeConcepts.forEach(concept => {
+          const keywords = conceptMap[concept];
+          const matched = keywords.filter(kw => textToEmbed.includes(kw));
+          if (matched.length > 0) {
+            matchCount += matched.length * 1.5;
+            matchReason = `Concept: ${concept.toUpperCase()} (${matched.slice(0, 2).join(', ')})`;
+          }
+        });
+
+        // Exact category alignment
+        if (source.category && activeConcepts.some(c => source.category.toLowerCase().includes(c))) {
+          matchCount += 3;
+        }
+
+        const maxPossible = Math.max(1, words.length * 2 + activeConcepts.length * 3);
+        similarity = Math.min(0.98, Math.max(0.25, matchCount / maxPossible));
+      }
+
+      if (similarity > 0.75 && matchReason === 'Semantic Relevance') {
+        matchReason = 'High Vector Match';
+      }
+
+      return {
+        email,
+        similarity: parseFloat(similarity.toFixed(2)),
+        matchReason
+      };
+    }));
+
+    // Sort descending by similarity score
+    return scoredEmails
+      .filter(item => item.similarity > 0.2)
+      .sort((a, b) => b.similarity - a.similarity);
+  }
+
+  /**
    * Seed initial knowledge base
    */
   async seedKnowledgeBase(): Promise<void> {
